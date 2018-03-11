@@ -40,7 +40,7 @@ class TMDB(object):
     def _get_guest_session_id_path(self, key):
         return self._get_path(key).format(
             guest_session_id=self.guest_session_id)
-    
+
     def _get_credit_id_path(self, key):
         return self._get_path(key).format(credit_id=self.credit_id)
 
@@ -73,7 +73,7 @@ class TMDB(object):
         params = self._get_params(params)
 
         response = requests.request(
-            method, url, params=params, 
+            method, url, params=params,
             data=json.dumps(payload) if payload else payload,
             headers=self.headers)
 
@@ -81,8 +81,22 @@ class TMDB(object):
         response.encoding = 'utf-8'
         return response.json()
 
+    def _request_binary(self, method, path, params=None, payload=None):
+        url = path
+        params = self._get_params(params)
+        response = requests.request(
+            method, url, params=params,
+            data=json.dumps(payload) if payload else payload,
+            headers=self.headers)
+
+        response.raise_for_status()
+        return response.content
+
     def _GET(self, path, params=None):
         return self._request('GET', path, params=params)
+
+    def _GET_BINARY(self, path, params=None):
+        return self._request_binary('GET', path, params=params)
 
     def _POST(self, path, params=None, payload=None):
         return self._request('POST', path, params=params, payload=payload)
@@ -104,4 +118,3 @@ class TMDB(object):
             for key in response.keys():
                 if not hasattr(self, key) or not callable(getattr(self, key)):
                     setattr(self, key, response[key])
-
